@@ -7,6 +7,9 @@ add_executable(${CMAKE_PROJECT_NAME}
 	
 	src/Matrix.h
 	src/Matrix.cpp
+
+	src/Network.h
+	src/Network.cpp
 )
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${CMAKE_PROJECT_NAME})

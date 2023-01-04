@@ -4,20 +4,46 @@
 #include <iomanip>
 #include "Matrix.h"
 
+using namespace std;
 
-Matrix::Matrix(int height, int width = 1) {
-	if (width <= 0 || height <= 0)
-		throw std::length_error("Matrix constructor has 0 or negative size");
-	_height = height;
-	_width = width;
-	_array = new double[height * width]{};
+Matrix::Matrix(size_t height, size_t width, double filler): _height(height), _width(width) {
+	if (width == 0 || height == 0)
+		throw length_error("Matrix constructor has 0");
+
+	_array = new double[height * width];
+	for (size_t i = 0; i < height * width; i++)
+		_array[i] = filler;
+}
+
+Matrix::Matrix(size_t height, size_t width, double min, double max) : _height(height), _width(width) {
+	if (width == 0 || height == 0)
+		throw length_error("Matrix constructor has 0");
+
+	_array = new double[height * width];
+
+	random_device rd;
+	mt19937 gen(rd());
+	uniform_real_distribution<> dist(min, max);
+
+	for (int i = 0; i < width*height; i++)
+		_array[i] = dist(gen);
+
 }
 
 
-Matrix::Matrix(const Matrix& other):Matrix(other._height, other._width)
+Matrix::Matrix(const Matrix& other) : _height(other._height), _width(other._width)
 {
+	_array = new double[_height * _width];
 	for (int i = 0; i < _height * _width; i++) {
 		_array[i] = other._array[i];
+	}
+}
+
+Matrix::Matrix(const vector<double>& vec): _height(vec.size()), _width(1)
+{
+	_array = new double[_height * _width];
+	for (int i = 0; i < vec.size(); i++) {
+		_array[i] = vec[i];
 	}
 }
 
@@ -26,10 +52,47 @@ Matrix::~Matrix(){
 	delete[] _array;
 }
 
+Matrix& Matrix::operator=(Matrix& other){
+	if (other._height > _height || other._width > _width) {
+		_height = other._height;
+		_width = other._width;
+		delete[] _array;
+		_array = new double[_height * _width];
+		for (int i = 0; i < _height * _width; i++) {
+			_array[i] = other._array[i];
+		}
+	}
+	else
+	{
+		for (size_t i = 0; i < other._height; i++)
+			for (size_t j = 0; j < other._width; j++)
+				(*this)(i, j) = other(i, j);
+	}
+	return *this;
+}
+
+Matrix& Matrix::operator=(const vector<double>& vec)
+{
+	if (vec.size() > _width * _height)
+		throw invalid_argument("Matrix operator= vector size > _array size");
+	for (size_t i = 0; i < vec.size(); i++)
+		_array[i] = vec[i];
+	
+}
+
+
+vector<double> Matrix::toVector()
+{
+	vector<double> result(_width * _height);
+	for (size_t i = 0; i < result.size(); i++) {
+		result[i] = _array[i];
+	}
+	return result;
+}
 
 Matrix Matrix::operator+(double number){
 	Matrix result(_height, _width);
-	for (int i = 0; i < _height * _width; i++) {
+	for (size_t i = 0; i < _height * _width; i++) {
 		result._array[i] = _array[i] + number;
 	}
 	return result;
@@ -38,7 +101,7 @@ Matrix Matrix::operator+(double number){
 
 Matrix Matrix::operator-(double number){
 	Matrix result(_height, _width);
-	for (int i = 0; i < _height * _width; i++) {
+	for (size_t i = 0; i < _height * _width; i++) {
 		result._array[i] = _array[i] - number;
 	}
 	return result;
@@ -46,7 +109,7 @@ Matrix Matrix::operator-(double number){
 
 Matrix Matrix::operator*(double number){
 	Matrix result(_height, _width);
-	for (int i = 0; i < _height * _width; i++) {
+	for (size_t i = 0; i < _height * _width; i++) {
 		result._array[i] = _array[i] * number;
 	}
 	return result;
@@ -55,20 +118,18 @@ Matrix Matrix::operator*(double number){
 
 Matrix Matrix::operator/(double number){
 	if (number == 0)
-		throw std::runtime_error("Matrix operator/ divide by zero error");
+		throw runtime_error("Matrix operator/ divide by zero error");
 	Matrix result(_height, _width);
-	for (int i = 0; i < _height * _width; i++) {
+	for (size_t i = 0; i < _height * _width; i++) {
 		result._array[i] = _array[i] / number;
 	}
 	return result;
 }
 
 
-void Matrix::print(int precision)
+void Matrix::print(size_t precision)
 {
-	if (precision < 0)
-		throw std::invalid_argument("Matrix::print precision is negative");
-	std::cout << std::setprecision(precision) << std::fixed;
+	cout << setprecision(precision) << fixed;
 
 	bool negative = false;
 	int max = abs(_array[0]) + 0.5;
@@ -80,55 +141,46 @@ void Matrix::print(int precision)
 			negative = true;
 	}
 
-	int width = precision + int(precision > 0) + int(negative);
+	size_t width = precision + int(precision > 0) + int(negative);
 	do {
 		width++;
 		max /= 10;
 	} while (max > 0);
 
-	std::cout << " _" << std::setw(_width * (width + 1) + 1) << "_\n";
-	std::cout << "| " << std::setw(_width * (width + 1) + 2) << "|\n";
+	cout << " _" << setw(_width * (width + 1) + 1) << "_\n";
+	cout << "| " << setw(_width * (width + 1) + 2) << "|\n";
 
-	for (int i = 0; i < _height; i++) {
-		std::cout << "| ";
-		for (int j = 0; j < _width; j++)
-			std::cout << std::setw(width) << (*this)(i, j) << " ";
-		std::cout << "|\n";
+	for (size_t i = 0; i < _height; i++) {
+		cout << "| ";
+		for (size_t j = 0; j < _width; j++)
+			cout << setw(width) << (*this)(i, j) << " ";
+		cout << "|\n";
 	}
-	std::cout << "|_" << std::setw(_width * (width + 1)+1) << "_|" << std::endl;
+	cout << "|_" << setw(_width * (width + 1)+1) << "_|" << endl;
 }
 
-double& Matrix::operator() (int row, int column){
-	if (row < 0 || column < 0)
-		throw std::out_of_range("Matrix index is negative");
+double& Matrix::operator() (size_t row, size_t column){
 	if (row >= _height || column >= _width)
-		throw std::out_of_range("Matrix index out of range");
+		throw out_of_range("Matrix index out of range");
 	return _array[row * _width + column];
+}
+
+double& Matrix::operator[](size_t i)
+{
+	if (i > _width*_height)
+		throw out_of_range("Matrix index out of range");
+	return _array[i];
 }
 
 Matrix Matrix::operator*(Matrix& other)
 {
 	if (_width != other._height)
-		throw std::invalid_argument("_width != other._height");
+		throw invalid_argument("_width != other._height");
 	Matrix result(_height, other._width);
-	for (int i = 0; i < _height; i++)
-		for (int j = 0; j < other._width; j++)
-			for (int k = 0; k < _width; k++) {
+	for (size_t i = 0; i < _height; i++)
+		for (size_t j = 0; j < other._width; j++)
+			for (size_t k = 0; k < _width; k++) {
 				result(i, j) += (*this)(i, k) * other(k, j);
 			}
 	return result;
 }
-
-Matrix Matrix::Random(int height, int width, int min=0, int max=1)
-{
-	Matrix matrix(height, width);
-	std::random_device rd;
-	std::mt19937 gen(rd());
-	std::uniform_real_distribution<> dist(min, max);
-
-	for (int i = 0; i < matrix._width * matrix._height; i++)
-		matrix._array[i] = dist(gen);
-	return matrix;
-}
-
-

@@ -1,13 +1,12 @@
 #include <iostream>
+#include <fstream>
 #include "Matrix.h"
+#include "Network.h"
 
-int main(){
-	Matrix first = Matrix::Random(4, 4, 0, 10);
-	Matrix second = first;
-	first(1, 3) = 999999;
-	
+int main() {
+	Network test("Network.txt");
 
-	//Вывод
-	first.print(5);
-	second.print(0);
+	for (double n : test.feedForward({ 1, 2 }))
+		cout << n << "\n";
+
 }
