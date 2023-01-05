@@ -184,3 +184,5 @@ Matrix Matrix::operator*(Matrix& other)
 			}
 	return result;
 }
+
+

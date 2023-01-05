@@ -4,6 +4,7 @@
 #include <vector>
 #include <string>
 #include "Matrix.h"
+#include "ActivationFunction.h"
 
 using namespace std;
 
@@ -12,21 +13,23 @@ private:
 	string _filename;
 	bool _saveToFile;
 
-	size_t _size;             // Количество слоёв
+	size_t _size;                          // Количество слоёв
 
-	vector<size_t> _layers;   // Количество нейронов в слоях
-	vector<size_t> _biases;   // Количество нейронов смещения в слоях
+	vector<size_t> _layers;                // Количество нейронов в слоях
+	vector<size_t> _biases;                // Количество нейронов смещения в слоях
+	vector<ActivationFunction> _functions; // Функции активации для слоёв
 
-	vector<Matrix> _neurons;    // Значения нейронов [Не уверен, что это нужно вообще]
-	vector<Matrix> _weights;    // Значения весов
+	vector<Matrix> _neurons;               // Значения нейронов [Не уверен, что это нужно вообще]
+	vector<Matrix> _weights;               // Значения весов
 
 public:
-	Network(size_t size, vector<size_t> layers, vector<size_t> biases, double filler = 0, string filename = "");
-	Network(size_t size, vector<size_t> layers, vector<size_t> biases, double min, double max, string filename="");
+	Network(size_t size, vector<size_t> layers, vector<size_t> biases, vector<ActivationFunction> functions, double filler = 0, string filename = "");
+	Network(size_t size, vector<size_t> layers, vector<size_t> biases, vector<ActivationFunction> functions, double min, double max, string filename="");
 	Network(string filename, bool save = true);
 	~Network();
 
 	vector<double> feedForward(const vector<double>&);
+
 };
 
 #endif

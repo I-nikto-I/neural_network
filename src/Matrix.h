@@ -5,6 +5,7 @@
 using namespace std;
 
 class Matrix{
+friend class ActivationFunction;
 private:
 	size_t _height;
 	size_t _width;
@@ -34,6 +35,8 @@ public:
 	Matrix operator* (Matrix&);
 	//Matrix operator+ (Matrix&);
 	//Matrix operator- (Matrix&);
+
+	
 
 	template <typename Type>
 	Matrix(size_t height, size_t width, Type &in): _height(height), _width(width) {
