@@ -47,12 +47,19 @@ Matrix::Matrix(const vector<double>& vec): _height(vec.size()), _width(1)
 	}
 }
 
+Matrix::Matrix(initializer_list<double> array): _height(array.size()), _width(1){
+	_array = new double[array.size()];
+	for (size_t i = 0; i < array.size(); i++) {
+		_array[i] = array.begin()[i];
+	}
+}
+
 
 Matrix::~Matrix(){
 	delete[] _array;
 }
 
-Matrix& Matrix::operator=(Matrix& other){
+Matrix& Matrix::insert(Matrix& other){
 	if (other._height > _height || other._width > _width) {
 		_height = other._height;
 		_width = other._width;
@@ -71,15 +78,45 @@ Matrix& Matrix::operator=(Matrix& other){
 	return *this;
 }
 
+Matrix& Matrix::operator=(Matrix& other){
+	_height = other._height;
+	_width = other._width;
+	delete[] _array;
+	_array = new double[_height * _width];
+	for (int i = 0; i < _height * _width; i++) {
+		_array[i] = other._array[i];
+	}
+	return *this;
+}
+
 Matrix& Matrix::operator=(const vector<double>& vec)
 {
 	if (vec.size() > _width * _height)
 		throw invalid_argument("Matrix operator= vector size > _array size");
 	for (size_t i = 0; i < vec.size(); i++)
 		_array[i] = vec[i];
+	return *this;
 	
 }
 
+
+Matrix Matrix::map(double(*function)(double))
+{
+	Matrix result(_height, _width);
+	for (size_t i = 0; i < _width * _height; i++) {
+		result._array[i] = function(_array[i]);
+	}
+	return result;
+}
+
+double Matrix::sum()
+{
+	double result = 0;
+	for (size_t i = 0; i < _width * _height; i++) {
+		result += _array[i];
+	}
+	return result;
+}
 
 vector<double> Matrix::toVector()
 {
@@ -182,6 +219,58 @@ Matrix Matrix::operator*(Matrix& other)
 			for (size_t k = 0; k < _width; k++) {
 				result(i, j) += (*this)(i, k) * other(k, j);
 			}
+	return result;
+}
+
+Matrix Matrix::operator+(Matrix& other)
+{
+	if (_width < other._width || _height < other._height)
+		throw invalid_argument("Matrix operator- size < other size");
+	Matrix result(*this);
+	for (size_t i = 0; i < other._width * other._height; i++) {
+		result._array[i] += other._array[i];
+	}
+	return result;
+}
+
+Matrix Matrix::operator-(Matrix& other)
+{
+	if (_width < other._width || _height < other._height)
+		throw invalid_argument("Matrix operator- size < other size");
+	Matrix result(*this);
+	for (size_t i = 0; i < other._width * other._height; i++) {
+		result._array[i] -= other._array[i];
+	}
+	return result;
+}
+
+Matrix Matrix::hadamarProduct(Matrix& other)
+{
+	if (_width < other._width || _height < other._height)
+		throw invalid_argument("Matrix operator- size < other size");
+	Matrix result(*this);
+	for (size_t i = 0; i < other._width * other._height; i++) {
+		result._array[i] *= other._array[i];
+	}
+	return result;
+}
+
+Matrix Matrix::transponse(){
+	Matrix result(_width, _height);
+	for (size_t i = 0; i < _height; i++)
+		for (size_t j = 0; j < _width; j++)
+			result(j, i) = (*this)(i, j);
+	return result;
+}
+
+Matrix Matrix::cut(size_t height, size_t width)
+{
+	if (_height < height || _width < width)
+		throw invalid_argument("Matrix::cut size error");
+	Matrix result(height, width);
+	for (size_t i = 0; i < height; i++)
+		for (size_t j = 0; j < width; j++)
+			result(i, j) = (*this)(i, j);
 	return result;
 }
 

@@ -9,7 +9,7 @@
 using namespace std;
 
 class Network {
-private:
+public: //Временно!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 	string _filename;
 	bool _saveToFile;
 
@@ -19,7 +19,8 @@ private:
 	vector<size_t> _biases;                // Количество нейронов смещения в слоях
 	vector<ActivationFunction> _functions; // Функции активации для слоёв
 
-	vector<Matrix> _neurons;               // Значения нейронов [Не уверен, что это нужно вообще]
+	vector<Matrix> _neuronsLinear;         // Значения нейронов до функции активации
+	vector<Matrix> _neuronsActivation;     // Значения нейронов после функции активации
 	vector<Matrix> _weights;               // Значения весов
 
 public:
@@ -28,7 +29,8 @@ public:
 	Network(string filename, bool save = true);
 	~Network();
 
-	vector<double> feedForward(const vector<double>&);
+	Matrix feedForward(Matrix&);
+	vector<Matrix> backpropagation(Matrix& input, Matrix& targetOutput);
 
 };
 

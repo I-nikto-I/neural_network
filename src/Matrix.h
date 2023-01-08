@@ -2,6 +2,7 @@
 #define MATRIX_H
 
 #include <vector>
+#include <initializer_list>
 using namespace std;
 
 class Matrix{
@@ -15,9 +16,10 @@ public:
 	Matrix(size_t height, size_t width, double min, double max);
 	Matrix(const Matrix&);
 	Matrix(const vector<double>&);
+	Matrix(initializer_list<double>);
 	~Matrix();
 
-	Matrix& operator= (Matrix&);
+    Matrix& operator= (Matrix&);
 	Matrix& operator= (const vector<double>&);
 
 	void print(size_t precision = 2);
@@ -25,6 +27,10 @@ public:
 	double& operator[] (size_t i);
 	size_t getWidth() {return _width;}
 	size_t getHeight() {return _height;}
+	size_t size() { return _width * _height; };
+	Matrix map(double (*)(double));
+	Matrix& Matrix::insert(Matrix&);
+	double sum();
 	vector<double> toVector();
 
 	Matrix operator+ (double);
@@ -33,8 +39,13 @@ public:
 	Matrix operator/ (double);
 
 	Matrix operator* (Matrix&);
-	//Matrix operator+ (Matrix&);
-	//Matrix operator- (Matrix&);
+	Matrix operator+ (Matrix&);
+	Matrix operator- (Matrix&);
+
+	Matrix hadamarProduct(Matrix&);
+	Matrix transponse();
+	Matrix cut(size_t height, size_t width = 1);
+
 
 	
 
