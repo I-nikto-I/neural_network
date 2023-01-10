@@ -98,7 +98,7 @@ Matrix ActivationFunction::softmaxFunction(Matrix& matrix)
 double ActivationFunction::crossEntropyErrorFunction(Matrix& activation, Matrix& target)
 {
 	double result = 0;
-	for (size_t i = 0; i < target._width * target._height; i++) {
+	for (size_t i = 0; i < target._size; i++) {
 		result += -target._array[i] * log(activation._array[i]);
 	}
 	return result;
@@ -112,7 +112,7 @@ Matrix ActivationFunction::CESoftmaxErrorDerivative(Matrix& activation, Matrix& 
 double ActivationFunction::meanSquearedErrorFunction(Matrix& activation, Matrix& target)
 {
 	double result = 0;
-	for (size_t i = 0; i < target._width * target._height; i++) {
+	for (size_t i = 0; i < target._size; i++) {
 		double x = activation._array[i] - target._array[i];
 		result += x*x;
 	}

@@ -10,6 +10,7 @@ friend class ActivationFunction;
 private:
 	size_t _height;
 	size_t _width;
+	size_t _size;
 	double* _array;
 public:
 	Matrix(size_t height, size_t width=1, double filler=0);
@@ -20,14 +21,14 @@ public:
 	~Matrix();
 
     Matrix& operator= (Matrix&);
-	Matrix& operator= (const vector<double>&);
 
+	void random(double min, double max);
 	void print(size_t precision = 2);
 	double& operator() (size_t row, size_t column = 0);
 	double& operator[] (size_t i);
-	size_t getWidth() {return _width;}
-	size_t getHeight() {return _height;}
-	size_t size() { return _width * _height; };
+	size_t getWidth() const {return _width;}
+	size_t getHeight() const {return _height;}
+	size_t size() const { return _width * _height; };
 	Matrix map(double (*)(double));
 	Matrix& Matrix::insert(Matrix&);
 	double sum();
@@ -42,6 +43,9 @@ public:
 	Matrix operator+ (Matrix&);
 	Matrix operator- (Matrix&);
 
+	Matrix operator+= (Matrix&);
+	Matrix operator-= (Matrix&);
+
 	Matrix hadamarProduct(Matrix&);
 	Matrix transponse();
 	Matrix cut(size_t height, size_t width = 1);
@@ -50,12 +54,12 @@ public:
 	
 
 	template <typename Type>
-	Matrix(size_t height, size_t width, Type &in): _height(height), _width(width) {
+	Matrix(size_t height, size_t width, Type &in): _height(height), _width(width), _size(width*height) {
 		if (width == 0 || height == 0)
 			throw length_error("Matrix constructor has 0");
 
-		_array = new double[height * width];
-		for (size_t i = 0; i < height * width; i++)
+		_array = new double[_size];
+		for (size_t i = 0; i < _size; i++)
 			in >> _array[i];
 	}
 
