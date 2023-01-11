@@ -52,9 +52,15 @@ Matrix::Matrix(const vector<double>& vec): _height(vec.size()), _width(1)
 
 Matrix::Matrix(initializer_list<double> array) : _height(array.size()), _width(1), _size(array.size()) {
 	_array = new double[_size];
-	for (size_t i = 0; i < _size; i++) {
+	for (size_t i = 0; i < _size; i++) 
 		_array[i] = array.begin()[i];
-	}
+}
+
+Matrix::Matrix(ifstream& file, size_t height, size_t width): _height(height), _width(width), _size(width*height){
+	_array = new double[_size];
+	int sizeOfDouble = sizeof(double);
+	for (size_t i = 0; i < _size; i++)
+		file.read((char*)&_array[i], sizeOfDouble);
 }
 
 
@@ -159,6 +165,12 @@ Matrix Matrix::operator/(double number){
 	return result;
 }
 
+
+void Matrix::writeToBinFile(ofstream& file){
+	int sizeOfDouble = sizeof(double);
+	for (size_t i = 0; i < _size; i++)
+		file.write((char*)&_array[i], sizeOfDouble);
+}
 
 void Matrix::random(double min, double max)
 {

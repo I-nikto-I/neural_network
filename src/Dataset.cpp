@@ -27,34 +27,66 @@ Dataset::Dataset(const vector<Matrix>& inputs, const vector<Matrix>& outputs){
 	_outputs = outputs;
 }
 
-Dataset::Dataset(string filename)
-{
+Dataset::Dataset(string filename, bool binary){
 	ifstream file;
-	file.open(filename);
 
-	file >> _size;
-	file >> _inputSize >> _outputSize;
+	if (binary) {
+		file.open(filename, ios_base::binary);
 
-	_indexes.resize(_size);
-	for (size_t i = 0; i < _size; i++) {
-		_inputs.push_back(Matrix(_inputSize, 1, file));
-		_outputs.push_back(Matrix(_outputSize, 1, file));
-		_indexes[i] = i;
+		file.read((char*)&_size, sizeof(_size));
+		file.read((char*)&_inputSize, sizeof(_inputSize));
+		file.read((char*)&_outputSize, sizeof(_outputSize));
+
+		_indexes.resize(_size);
+		for (size_t i = 0; i < _size; i++) {
+			_inputs.push_back(Matrix(file, _inputSize));
+			_outputs.push_back(Matrix(file, _outputSize));
+			_indexes[i] = i;
+		}
 	}
+	else {
+		file.open(filename);
+
+		file >> _size;
+		file >> _inputSize >> _outputSize;
+
+		_indexes.resize(_size);
+		for (size_t i = 0; i < _size; i++) {
+			_inputs.push_back(Matrix(_inputSize, 1, file));
+			_outputs.push_back(Matrix(_outputSize, 1, file));
+			_indexes[i] = i;
+		}
+	}
+	
 	
 	file.close();
 }
 
-void Dataset::safeToFile(string filename){
+void Dataset::safeToFile(string filename, bool binary){
 	ofstream file;
-	file.open(filename);
 
-	file << _size << "\n";
-	file << _inputSize << " " << _outputSize << "\n\n\n";
+	if (binary) {
+		file.open(filename, ios_base::binary);
 
-	for (size_t i = 0; i < _size; i++) {
-		file << _inputs[i];
-		file << _outputs[i] <<"\n";
+		file.write((char*)&_size, sizeof(_size));
+		file.write((char*)&_inputSize, sizeof(_inputSize));
+		file.write((char*)&_outputSize, sizeof(_outputSize));
+
+		for (size_t i = 0; i < _size; i++) {
+			_inputs[i].writeToBinFile(file);
+			_outputs[i].writeToBinFile(file);
+		}
+	}
+	else {
+		file.open(filename);
+
+		file << _size << "\n";
+		file << _inputSize << " " << _outputSize << "\n\n\n";
+
+		for (size_t i = 0; i < _size; i++) {
+			file << _inputs[i];
+			file << _outputs[i] << "\n";
+		}
 	}
 
 	file.close();

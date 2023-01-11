@@ -3,6 +3,8 @@
 
 #include <vector>
 #include <initializer_list>
+#include <fstream>
+
 using namespace std;
 
 class Matrix{
@@ -18,10 +20,12 @@ public:
 	Matrix(const Matrix&);
 	Matrix(const vector<double>&);
 	Matrix(initializer_list<double>);
+	Matrix(ifstream& file, size_t height, size_t width = 1);
 	~Matrix();
 
     Matrix& operator= (Matrix&);
 
+	void writeToBinFile(ofstream& file);
 	void random(double min, double max);
 	void print(size_t precision = 2);
 	double& operator() (size_t row, size_t column = 0);

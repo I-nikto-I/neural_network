@@ -20,9 +20,9 @@ private:
 public:
 	Dataset(const vector<Matrix>& inputs, const vector<Matrix>& outputs);
 	Dataset(size_t inputSize, size_t outputSize) : _inputSize(inputSize), _outputSize(outputSize) {};
-	Dataset(string filename);
+	Dataset(string filename, bool binary = true);
 
-	void safeToFile(string filename);
+	void safeToFile(string filename, bool binary = true);
 
 	void add(Matrix& input, Matrix& output);
 

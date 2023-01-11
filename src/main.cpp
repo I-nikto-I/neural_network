@@ -2,20 +2,25 @@
 #include <fstream>
 #include <chrono>
 #include <iomanip>
+#include <bitset>
 #include <random>
+#include <intrin.h>
 #include "Matrix.h"
 #include "Network.h"
 #include "ActivationFunction.h"
 
+//_byteswap_ulong()
+
 int main() {
-	Network test(2, { 2, 2 }, { 1, 0 }, { 1 }, -1, 1, "Network.txt");
-	Dataset dataset("Test.ds");
+	int magicNumber;
+	int numberOfImages;
+	int rows;
+	int cols;
 
-	test.train(dataset, 0.1, 1000);
+	ifstream file("train_labels.bin", ios_base::binary);
+	int test;
+	file.read((char*)&magicNumber, sizeof(int));
 
-	cout << setprecision(0) << fixed;
-	for (size_t i = 0; i < dataset.getSize(); i++)
-		cout << test.feedForward(dataset.getInput(i));
 
 	
 }
