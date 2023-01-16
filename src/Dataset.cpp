@@ -32,6 +32,8 @@ Dataset::Dataset(string filename, bool binary){
 
 	if (binary) {
 		file.open(filename, ios_base::binary);
+		if (!file.is_open())
+			throw runtime_error("Dataset constructor: failed to open file");
 
 		file.read((char*)&_size, sizeof(_size));
 		file.read((char*)&_inputSize, sizeof(_inputSize));
@@ -46,6 +48,8 @@ Dataset::Dataset(string filename, bool binary){
 	}
 	else {
 		file.open(filename);
+		if (!file.is_open())
+			throw runtime_error("Dataset constructor: failed to open file");
 
 		file >> _size;
 		file >> _inputSize >> _outputSize;
@@ -62,11 +66,13 @@ Dataset::Dataset(string filename, bool binary){
 	file.close();
 }
 
-void Dataset::safeToFile(string filename, bool binary){
+void Dataset::saveToFile(string filename, bool binary){
 	ofstream file;
 
 	if (binary) {
 		file.open(filename, ios_base::binary);
+		if (!file.is_open())
+			throw runtime_error("Dataset saveToFile: failed to open file");
 
 		file.write((char*)&_size, sizeof(_size));
 		file.write((char*)&_inputSize, sizeof(_inputSize));
@@ -79,6 +85,8 @@ void Dataset::safeToFile(string filename, bool binary){
 	}
 	else {
 		file.open(filename);
+		if (!file.is_open())
+			throw runtime_error("Dataset saveToFile: failed to open file");
 
 		file << _size << "\n";
 		file << _inputSize << " " << _outputSize << "\n\n\n";
@@ -92,7 +100,7 @@ void Dataset::safeToFile(string filename, bool binary){
 	file.close();
 }
 
-void Dataset::add(Matrix& input, Matrix& output){
+void Dataset::add(const Matrix& input, const Matrix& output) {
 	if (input.size() != _inputSize || output.size() != _outputSize)
 		throw length_error("Dataset add() invalid input/output size");
 	_inputs.push_back(input);
@@ -113,7 +121,7 @@ void Dataset::next(){
 		_index = 0;
 }
 
-Matrix& Dataset::getInput(int index){
+const Matrix& Dataset::getInput(int index){
 	if (index >= _size)
 		throw length_error("Dataset getInput index out of range");
 
@@ -122,7 +130,7 @@ Matrix& Dataset::getInput(int index){
 	return _inputs[_indexes[index]];
 }
 
-Matrix& Dataset::getOuput(int index){
+const Matrix& Dataset::getOuput(int index){
 	if (index >= _size)
 		throw length_error("Dataset getOutput index out of range");
 

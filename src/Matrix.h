@@ -23,44 +23,46 @@ public:
 	Matrix(ifstream& file, size_t height, size_t width = 1);
 	~Matrix();
 
-    Matrix& operator= (Matrix&);
+    Matrix& operator= (const Matrix&);
 
+	Matrix& setSize(size_t height, size_t width);
 	void writeToBinFile(ofstream& file);
 	void random(double min, double max);
-	void print(size_t precision = 2);
+	void print(size_t precision = 2) const;
 	double& operator() (size_t row, size_t column = 0);
+	double operator() (size_t row, size_t column = 0) const;
 	double& operator[] (size_t i);
+	double operator[] (size_t i) const;
 	size_t getWidth() const {return _width;}
 	size_t getHeight() const {return _height;}
 	size_t size() const { return _width * _height; };
-	Matrix map(double (*)(double));
-	Matrix& Matrix::insert(Matrix&);
-	double sum();
-	vector<double> toVector();
+	Matrix map(double (*)(double)) const;
+	Matrix& Matrix::insert(const Matrix&);
+	double sum() const;
+	vector<double> toVector() const;
 
-	Matrix operator+ (double);
-	Matrix operator- (double);
-	Matrix operator* (double);
-	Matrix operator/ (double);
+	Matrix operator+ (double) const;
+	Matrix operator- (double) const;
+	Matrix operator* (double) const;
+	Matrix operator/ (double) const;
 
-	Matrix operator* (Matrix&);
-	Matrix operator+ (Matrix&);
-	Matrix operator- (Matrix&);
+	Matrix operator* (const Matrix&) const;
+	Matrix operator+ (const Matrix&) const;
+	Matrix operator- (const Matrix&) const;
 
-	Matrix operator+= (Matrix&);
-	Matrix operator-= (Matrix&);
+	void operator+= (const Matrix&);
+	void operator-= (const Matrix&);
 
-	Matrix hadamarProduct(Matrix&);
-	Matrix transponse();
-	Matrix cut(size_t height, size_t width = 1);
+	Matrix& hadamarProduct(const Matrix&);
+	Matrix& add(const Matrix&);
+	Matrix transpose() const;
+	Matrix cut(size_t height, size_t width = 1) const;
 
 
 	
 
 	template <typename Type>
 	Matrix(size_t height, size_t width, Type &in): _height(height), _width(width), _size(width*height) {
-		if (width == 0 || height == 0)
-			throw length_error("Matrix constructor has 0");
 
 		_array = new double[_size];
 		for (size_t i = 0; i < _size; i++)
@@ -76,7 +78,7 @@ public:
 				out << "\n";
 			}
 		else {
-			for (int i = 0; i < matrix._height; i++) 
+			for (int i = 0; i < matrix._size; i++) 
 				out << matrix(i) << " ";
 			out << "\n";
 		}

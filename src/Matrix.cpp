@@ -8,8 +8,6 @@ using namespace std;
 
 Matrix::Matrix(size_t height, size_t width, double filler): 
 	_height(height), _width(width), _size(height * width) {
-	if (width == 0 || height == 0)
-		throw length_error("Matrix constructor has 0");
 
 	_array = new double[_size];
 	for (size_t i = 0; i < _size; i++)
@@ -18,8 +16,6 @@ Matrix::Matrix(size_t height, size_t width, double filler):
 
 Matrix::Matrix(size_t height, size_t width, double min, double max):
 	_height(height), _width(width), _size(height * width) {
-	if (width == 0 || height == 0)
-		throw length_error("Matrix constructor has 0");
 
 	_array = new double[_size];
 
@@ -68,27 +64,18 @@ Matrix::~Matrix(){
 	delete[] _array;
 }
 
-Matrix& Matrix::insert(Matrix& other){
-	if (other._height > _height || other._width > _width) {
-		_height = other._height;
-		_width = other._width;
-		_size = other._size;
-		delete[] _array;
-		_array = new double[_size];
-		for (int i = 0; i < _size; i++) {
-			_array[i] = other._array[i];
-		}
-	}
-	else
-	{
-		for (size_t i = 0; i < other._height; i++)
-			for (size_t j = 0; j < other._width; j++)
-				(*this)(i, j) = other(i, j);
-	}
+Matrix& Matrix::insert(const Matrix& other){
+	size_t height = min(_height, other._height);
+	size_t width = min(_width, other._width);
+	
+	for (size_t i = 0; i < height; i++)
+		for (size_t j = 0; j < width; j++)
+			(*this)(i, j) = other(i, j);
+	
 	return *this;
 }
 
-Matrix& Matrix::operator=(Matrix& other){
+Matrix& Matrix::operator=(const Matrix& other){
 	_height = other._height;
 	_width = other._width;
 	_size = other._size;
@@ -102,8 +89,7 @@ Matrix& Matrix::operator=(Matrix& other){
 }
 
 
-Matrix Matrix::map(double(*function)(double))
-{
+Matrix Matrix::map(double(*function)(double)) const {
 	Matrix result(_height, _width);
 	for (size_t i = 0; i < _size; i++) {
 		result._array[i] = function(_array[i]);
@@ -111,8 +97,7 @@ Matrix Matrix::map(double(*function)(double))
 	return result;
 }
 
-double Matrix::sum()
-{
+double Matrix::sum() const{
 	double result = 0;
 	for (size_t i = 0; i < _size; i++) {
 		result += _array[i];
@@ -120,8 +105,7 @@ double Matrix::sum()
 	return result;
 }
 
-vector<double> Matrix::toVector()
-{
+vector<double> Matrix::toVector() const{
 	vector<double> result(_size);
 	for (size_t i = 0; i < result.size(); i++) {
 		result[i] = _array[i];
@@ -129,7 +113,7 @@ vector<double> Matrix::toVector()
 	return result;
 }
 
-Matrix Matrix::operator+(double number){
+Matrix Matrix::operator+(double number) const{
 	Matrix result(_height, _width);
 	for (size_t i = 0; i < _size; i++) {
 		result._array[i] = _array[i] + number;
@@ -138,7 +122,7 @@ Matrix Matrix::operator+(double number){
 }
 
 
-Matrix Matrix::operator-(double number){
+Matrix Matrix::operator-(double number) const{
 	Matrix result(_height, _width);
 	for (size_t i = 0; i < _size; i++) {
 		result._array[i] = _array[i] - number;
@@ -146,7 +130,7 @@ Matrix Matrix::operator-(double number){
 	return result;
 }
 
-Matrix Matrix::operator*(double number){
+Matrix Matrix::operator*(double number) const{
 	Matrix result(_height, _width);
 	for (size_t i = 0; i < _size; i++) {
 		result._array[i] = _array[i] * number;
@@ -155,7 +139,7 @@ Matrix Matrix::operator*(double number){
 }
 
 
-Matrix Matrix::operator/(double number){
+Matrix Matrix::operator/(double number) const{
 	if (number == 0)
 		throw runtime_error("Matrix operator/ divide by zero error");
 	Matrix result(_height, _width);
@@ -166,14 +150,22 @@ Matrix Matrix::operator/(double number){
 }
 
 
+Matrix& Matrix::setSize(size_t height, size_t width)
+{
+	if (height * width != _size)
+		throw length_error("Matrix setSize: new size != old size");
+	_height = height;
+	_width = width;
+	return *this;
+}
+
 void Matrix::writeToBinFile(ofstream& file){
 	int sizeOfDouble = sizeof(double);
 	for (size_t i = 0; i < _size; i++)
 		file.write((char*)&_array[i], sizeOfDouble);
 }
 
-void Matrix::random(double min, double max)
-{
+void Matrix::random(double min, double max){
 	random_device rd;
 	mt19937 gen(rd());
 	uniform_real_distribution<> dist(min, max);
@@ -182,8 +174,7 @@ void Matrix::random(double min, double max)
 		_array[i] = dist(gen);
 }
 
-void Matrix::print(size_t precision)
-{
+void Matrix::print(size_t precision) const{
 	cout << setprecision(precision) << fixed;
 
 	bool negative = false;
@@ -220,6 +211,13 @@ double& Matrix::operator() (size_t row, size_t column){
 	return _array[row * _width + column];
 }
 
+double Matrix::operator()(size_t row, size_t column) const
+{
+	if (row >= _height || column >= _width)
+		throw out_of_range("Matrix index out of range");
+	return _array[row * _width + column];
+}
+
 double& Matrix::operator[](size_t i)
 {
 	if (i > _size)
@@ -227,8 +225,14 @@ double& Matrix::operator[](size_t i)
 	return _array[i];
 }
 
-Matrix Matrix::operator*(Matrix& other)
+double Matrix::operator[](size_t i) const
 {
+	if (i > _size)
+		throw out_of_range("Matrix index out of range");
+	return _array[i];
+}
+
+Matrix Matrix::operator*(const Matrix& other) const {
 	if (_width != other._height)
 		throw invalid_argument("_width != other._height");
 	Matrix result(_height, other._width);
@@ -240,8 +244,7 @@ Matrix Matrix::operator*(Matrix& other)
 	return result;
 }
 
-Matrix Matrix::operator+(Matrix& other)
-{
+Matrix Matrix::operator+(const Matrix& other) const {
 	if (_width < other._width || _height < other._height)
 		throw invalid_argument("Matrix operator+ size < other size");
 	Matrix result(*this);
@@ -251,8 +254,7 @@ Matrix Matrix::operator+(Matrix& other)
 	return result;
 }
 
-Matrix Matrix::operator-(Matrix& other)
-{
+Matrix Matrix::operator- (const Matrix& other) const {
 	if (_width < other._width || _height < other._height)
 		throw invalid_argument("Matrix operator- size < other size");
 	Matrix result(*this);
@@ -262,40 +264,48 @@ Matrix Matrix::operator-(Matrix& other)
 	return result;
 }
 
-Matrix Matrix::operator+=(Matrix& other)
-{
+void Matrix::operator+=(const Matrix& other){
 	if (_width < other._width || _height < other._height)
 		throw invalid_argument("Matrix operator+= size < other size");
 
 	for (size_t i = 0; i < other._height; i++)
 		for (size_t j = 0; j < other._width; j++)
 			(*this)(i, j) += other(i, j);
-	return*this;
 }
 
-Matrix Matrix::operator-=(Matrix& other)
-{
+void Matrix::operator-=(const Matrix& other){
 	if (_width < other._width || _height < other._height)
 		throw invalid_argument("Matrix operator-= size < other size");
 
 	for (size_t i = 0; i < other._height; i++)
 		for (size_t j = 0; j < other._width; j++)
 			(*this)(i, j) -= other(i, j);
-	return*this;
 }
 
-Matrix Matrix::hadamarProduct(Matrix& other)
-{
+Matrix& Matrix::hadamarProduct(const Matrix& other) {
 	if (_width < other._width || _height < other._height)
-		throw invalid_argument("Matrix operator- size < other size");
-	Matrix result(*this);
+		throw invalid_argument("Matrix operator-: size < other size");
+
 	for (size_t i = 0; i < other._height; i++)
 		for (size_t j = 0; j < other._width; j++)
-			result(i, j) *= other(i, j);
-	return result;
+			(*this)(i, j) *= other(i, j);
+
+	return (*this);
 }
 
-Matrix Matrix::transponse(){
+Matrix& Matrix::add(const Matrix& other)
+{
+	size_t height = min(_height, other._height);
+	size_t width = min(_width, other._width);
+
+	for (size_t i = 0; i < height; i++)
+		for (size_t j = 0; j < width; j++)
+			(*this)(i, j) += other(i, j);
+
+	return *this;
+}
+
+Matrix Matrix::transpose() const {
 	Matrix result(_width, _height);
 	for (size_t i = 0; i < _height; i++)
 		for (size_t j = 0; j < _width; j++)
@@ -303,8 +313,7 @@ Matrix Matrix::transponse(){
 	return result;
 }
 
-Matrix Matrix::cut(size_t height, size_t width)
-{
+Matrix Matrix::cut(size_t height, size_t width) const {
 	if (_height < height || _width < width)
 		throw invalid_argument("Matrix::cut size error");
 	Matrix result(height, width);

@@ -9,42 +9,40 @@ std::vector<double(*)(double)> ActivationFunction::_derivatives = { linearDeriva
 
 ActivationFunction::ActivationFunction(size_t number): _number(number){}
 
-double ActivationFunction::operator()(double x){
+double ActivationFunction::operator()(double x) const {
 	return _functions[_number](x);
 }
 
-double ActivationFunction::operator[](double x){
+double ActivationFunction::operator[](double x) const {
 	return _derivatives[_number](x);
 }
 
-Matrix ActivationFunction::operator()(Matrix& matrix){
+Matrix ActivationFunction::operator()(const Matrix& matrix) const {
 	if (_number == -1)
 		return softmaxFunction(matrix);
 	return matrix.map(_functions[_number]);
 }
 
-Matrix ActivationFunction::operator[](Matrix& matrix) {
+Matrix ActivationFunction::operator[](const Matrix& matrix) const {
 	if (_number == -1)
 		return Matrix(matrix._height, matrix._width, 1);
 	return matrix.map(_derivatives[_number]);
 }
 
-double ActivationFunction::error(Matrix& activation, Matrix& target)
-{
+double ActivationFunction::error(const Matrix& activation, const Matrix& target) const {
 	if (_number > 0)
-		return meanSquearedErrorFunction(activation, target);
+		return meanErrorFunction(activation, target);
 	return crossEntropyErrorFunction(activation, target);
 }
 
-Matrix ActivationFunction::errorDerivative(Matrix& activation, Matrix& target)
-{
+Matrix ActivationFunction::errorDerivative(const Matrix& activation, const Matrix& target) const {
 	if (_number > 0)
-		return meanSquearedErrorDerivative(activation, target);
+		return meanErrorDerivative(activation, target);
 	return CESoftmaxErrorDerivative(activation, target);
 }
 
 double ActivationFunction::sigmoidFunction(double x){
-	return 1/(1+exp(-x));
+	return 1 / (1 + exp(-x));
 }
 
 double ActivationFunction::sigmoidDerivative(double x){
@@ -86,7 +84,7 @@ double ActivationFunction::mySoftsignDerivative(double x){
 	return 0.5 / (x * x);
 }
 
-Matrix ActivationFunction::softmaxFunction(Matrix& matrix)
+Matrix ActivationFunction::softmaxFunction(const Matrix& matrix)
 {
 	Matrix e = matrix.map(exp);
 	double sum = e.sum();
@@ -95,7 +93,7 @@ Matrix ActivationFunction::softmaxFunction(Matrix& matrix)
 	return e / sum;
 }
 
-double ActivationFunction::crossEntropyErrorFunction(Matrix& activation, Matrix& target)
+double ActivationFunction::crossEntropyErrorFunction(const Matrix& activation, const Matrix& target)
 {
 	double result = 0;
 	for (size_t i = 0; i < target._size; i++) {
@@ -104,23 +102,22 @@ double ActivationFunction::crossEntropyErrorFunction(Matrix& activation, Matrix&
 	return result;
 }
 
-Matrix ActivationFunction::CESoftmaxErrorDerivative(Matrix& activation, Matrix& target)
+Matrix ActivationFunction::CESoftmaxErrorDerivative(const Matrix& activation, const Matrix& target)
 {
 	return activation - target;
 }
 
-double ActivationFunction::meanSquearedErrorFunction(Matrix& activation, Matrix& target)
+double ActivationFunction::meanErrorFunction(const Matrix& activation, const Matrix& target)
 {
 	double result = 0;
-	for (size_t i = 0; i < target._size; i++) {
-		double x = activation._array[i] - target._array[i];
-		result += x*x;
-	}
+	for (size_t i = 0; i < target._size; i++) 
+		result += activation._array[i] - target._array[i];
+	
 	return result;
 }
 
-Matrix ActivationFunction::meanSquearedErrorDerivative(Matrix& activation, Matrix& target)
+Matrix ActivationFunction::meanErrorDerivative(const Matrix& activation, const Matrix& target)
 {
-	return (activation-target)*2;
+	return activation - target;
 }
 

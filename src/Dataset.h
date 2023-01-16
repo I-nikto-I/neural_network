@@ -22,14 +22,14 @@ public:
 	Dataset(size_t inputSize, size_t outputSize) : _inputSize(inputSize), _outputSize(outputSize) {};
 	Dataset(string filename, bool binary = true);
 
-	void safeToFile(string filename, bool binary = true);
+	void saveToFile(string filename, bool binary = true);
 
-	void add(Matrix& input, Matrix& output);
+	void add(const Matrix& input, const Matrix& output);
 
 	void shuffle();
 	void next();
-	Matrix& getInput(int index = -1);
-	Matrix& getOuput(int index = -1);
+	const Matrix& getInput(int index = -1);
+	const Matrix& getOuput(int index = -1);
 
 	size_t getSize() { return _size; }
 	size_t getIndex() { return _index; }

@@ -27,14 +27,14 @@ public:
 
 	static ActivationFunction softmax()    { return ActivationFunction(-1); };
 
-	double operator() (double);
-	double operator[] (double);
+	double operator() (double) const;
+	double operator[] (double) const;
 	
-	Matrix operator()(Matrix&);
-	Matrix operator[](Matrix&);
+	Matrix operator()(const Matrix&) const;
+	Matrix operator[](const Matrix&) const;
 
-	double error(Matrix& activation, Matrix& target);
-	Matrix errorDerivative(Matrix& activation, Matrix& target);
+	double error(const Matrix& activation, const Matrix& target) const;
+	Matrix errorDerivative(const Matrix& activation, const Matrix& target) const;
 
 	template <typename Type>
 	friend Type& operator<< (Type& out, ActivationFunction& function) { out << function._number; return out; }
@@ -65,17 +65,17 @@ private:
 	static double mySoftsignFunction(double);
 	static double mySoftsignDerivative(double);
 
-	static Matrix softmaxFunction(Matrix&);
+	static Matrix softmaxFunction(const Matrix&);
 
 
-	//Error functions
+	//Cost functions
 
 
-	static double crossEntropyErrorFunction(Matrix& activation, Matrix& target);
-	static Matrix CESoftmaxErrorDerivative(Matrix& activation, Matrix& target);
+	static double crossEntropyErrorFunction(const Matrix& activation, const Matrix& target);
+	static Matrix CESoftmaxErrorDerivative(const Matrix& activation, const Matrix& target);
 
-	static double meanSquearedErrorFunction(Matrix& activation, Matrix& target);
-	static Matrix meanSquearedErrorDerivative(Matrix& activation, Matrix& target);
+	static double meanErrorFunction(const Matrix& activation, const Matrix& target);
+	static Matrix meanErrorDerivative(const Matrix& activation, const Matrix& target);
 	
 };
 
